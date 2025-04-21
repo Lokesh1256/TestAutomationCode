@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'environment', defaultValue: 'qa', description: 'Target Environment')
+        string(name: 'branch', defaultValue: 'develop', description: 'Git Branch')
+    }
+
+    tools {
+        maven 'Maven 3.8.5' // Use the name from Global Tools Config
+        jdk 'JDK 11'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: "${params.branch}", url: 'https://your.git.repo.git'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh "mvn clean test -Denvironment=${params.environment}"
+            }
+        }
+
+        stage('Publish Report') {
+            steps {
+                publishHTML (target: [
+                    reportDir: 'test-output/ExtentReports',
+                    reportFiles: 'index.html',
+                    reportName: "Extent Report"
+                ])
+            }
+        }
+    }
+}
